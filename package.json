@@ -1,0 +1,17 @@
+{
+  "name": "reorg-scanner",
+  "version": "0.0.1",
+  "description": "detects reorgs on Ethereum",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "thec00n",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^14.6.4",
+    "log4js": "^6.3.0",
+    "sleep": "^6.3.0",
+    "web3": "^1.2.11"
+  }
+}
