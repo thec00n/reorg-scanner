@@ -33,13 +33,13 @@ let blocks: Blocks = {};
 
 async function run() {
     let currentBlockNumber = await getCurrentBlockNumber();
-
+    let futureBlockNumber = currentBlockNumber + 1;
 
     while (true) {
-        let newBlockNumber = currentBlockNumber + 1;
-        const currentBlock = await getBlock(newBlockNumber);
+        const currentBlock = await getBlock(futureBlockNumber);
         if (currentBlock) {
-            currentBlockNumber = newBlockNumber;
+            currentBlockNumber = futureBlockNumber;
+            futureBlockNumber = currentBlockNumber + 1;
             const blockEntry: Block = {
                 hash: currentBlock.hash,
                 parentHash: currentBlock.parentHash
@@ -50,6 +50,7 @@ async function run() {
             const reorgs = await checkReorg(currentBlockNumber);
             if (reorgs > 0) {
                 console.log(`Found reorg with ${reorgs} blocks at block number ${currentBlockNumber})`)
+                logger.info(`Found reorg with ${reorgs} blocks at block number ${currentBlockNumber})`)
             }
         }
         sleep.sleep(5);
