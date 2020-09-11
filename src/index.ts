@@ -29,11 +29,11 @@ interface Block {
 
 let currentBlockNumber: number;
 let blocks: Blocks = {};
-
+let futureBlockNumber: number;
 
 async function run() {
-    let currentBlockNumber = await getCurrentBlockNumber();
-    let futureBlockNumber = currentBlockNumber + 1;
+    currentBlockNumber = await getCurrentBlockNumber();
+    futureBlockNumber = currentBlockNumber + 1;
 
     while (true) {
         const currentBlock = await getBlock(futureBlockNumber);
@@ -47,29 +47,40 @@ async function run() {
             blocks[currentBlockNumber] = blockEntry
             logger.info(`Found new block at ${currentBlockNumber} -> ${objectToString(blockEntry)}`)
 
-            const reorgs = await checkReorg(currentBlockNumber);
+            const reorgs = await checkReorg();
             if (reorgs > 0) {
-                console.log(`Found reorg with ${reorgs} blocks at block number ${currentBlockNumber})`)
-                logger.info(`Found reorg with ${reorgs} blocks at block number ${currentBlockNumber})`)
+                console.log(`Found reorg with ${reorgs} blocks at block number ${currentBlockNumber}`)
+                logger.info(`Found reorg with ${reorgs} blocks at block number ${currentBlockNumber}`)
             }
         }
         sleep.sleep(5);
     }
 }
 
-async function checkReorg(blockNumber: number): Promise<number> {
+async function checkReorg(): Promise<number> {
     let currentBlock;
     let lastBlock;
-    let counter = -1;
+    let counter = 0;
 
-    do {
-        if (!blocks[blockNumber - 1]) {
+    const blockNumbers = Object.keys(blocks);
+
+    while (blockNumbers.length - 1 > counter) {
+
+        logger.info(`Current blocks ${blockNumbers}`)
+
+        currentBlock = blocks[currentBlockNumber];
+        lastBlock = blocks[currentBlockNumber - 1];
+
+        if (currentBlock.parentHash === lastBlock.hash) {
             return counter;
         }
-        currentBlock = blocks[blockNumber];
-        lastBlock = blocks[blockNumber - 1];
-        counter++;
-    } while (currentBlock.parentHash !== lastBlock.hash)
+
+        counter = counter + 1;
+        currentBlockNumber = currentBlockNumber - 1;
+        logger.info(`Counter increased to ${counter})`)
+        logger.info(`Decreasing current block number to ${currentBlockNumber})`)
+
+    }
 
     return counter
 }
